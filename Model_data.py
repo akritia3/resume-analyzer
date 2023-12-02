@@ -1,6 +1,9 @@
 
+#import spacy
 import csv
 import pandas as pd
+from Word_tokenizer import *
+import random
 
 import spacy
 
@@ -18,7 +21,7 @@ resume_keys = [
     "january",
     "August",
     "industry",
-    "technical",
+    "yechnical",
     "exprience"
     "Areas of Expertise",
     "Key Skills",
@@ -41,32 +44,24 @@ resume_keys = [
     "References",
 ]
 
-resume_keywords = [value.lower() for value in resume_keys]
-# data_temp = []
-# with open('/Users/vikrampidaparthi/Documents/CS222_Project/group-project-team69/UpdatedResumeDataSet 3.csv', 'r', newline='') as csvfile:
-#     reader = csv.DictReader(csvfile)
-#     for row in reader:
-#         #data_temp = [row[1] for row in reader]
-#         print(row)
-#         break
-# print(data_temp)
-# dataset = []
-# dataset.append(row[1] in data_temp[1])
-#dataset = [row[1] for row in data_temp[1:]]
 
+resume_keys = get_most_used_words('UpdatedResumeDataSet.csv')
 
+resume_keys = resume_keys[:150]
+# print(resume_keys)
 
-df = pd.read_csv('/Users/vikrampidaparthi/Documents/CS222_Project/group-project-team69/UpdatedResumeDataSet 3.csv')
+resume_first_val = [check[0] for check in resume_keys]
+
+df = pd.read_csv('UpdatedResumeDataSet.csv')
 dataset = df['Resume']
-#print(dataset.iloc[0])
+## print(dataset.iloc[0])
 
 
-dataset = dataset.str.lower()
+#dataset = dataset.str.lower()
 
-
-
-
-
+# data of all the most common resume words
+# to check the keyword percentage, take every single value per resume, then how many of the mosst common words would be in 
+# resume, divide it by the total lengeth of the original commonw ords dataset. 
 
 def calculate_keyword_percentage(df, resume_keywords):
     
@@ -75,104 +70,256 @@ def calculate_keyword_percentage(df, resume_keywords):
         total_sum = len(resume_keywords)
         total_amt = 0
         words = row['Resume'].split()
-        
+        my_set = set()
         for word in words:
-            if word in resume_keywords:
+            if word in resume_keywords and word not in my_set:
                 total_amt+=1
-        print(total_amt)
-        print(total_sum)
+                my_set.add(word)
+        # # print(total_amt)
+        # # print(total_sum)
         percentage_array.append((float)(total_amt / total_sum) * 100)
-        print(percentage_array[0])
+        ## print(percentage_array[0])
         #break
     
     return percentage_array
+
+
+def calculate_single_percentage(words, resume_keywords):
+    total_sum = len(resume_keywords)
+    total_amt = 0
+    #words = row['Resume'].split()
+    my_set = set()
+    for word in words:
+        if word in resume_keywords and word not in my_set:
+            total_amt+=1
+            my_set.add(word)
+    return (float)(total_amt / total_sum) * 100
+
+##################
+
+
+df_part_one = df.head(len(df)//2)
+df_part_two = df.tail(len(df)//2)
+
+percentage_array = calculate_keyword_percentage(df_part_one, resume_first_val)
+# print(percentage_array)
+
+
+def returnGoodBadResumes(percentage_array):
+
+    index = 0
+    good_resumes = []
+    bad_resumes = []
+    for percent in percentage_array:
+        # get data only from the column required
+        #required = resume['Resume']
+        ## print(percent)
+        if percent >= 25:
+            good_resumes.append(dataset[index])
+        else: bad_resumes.append(dataset[index])
+        index +=1
+
+    # print("Length good:", len(good_resumes))
+    # print("Length bad:",len(bad_resumes))
+
+    return good_resumes, bad_resumes
+
+
+# #check the database and do NLP:
+#nlp = spacy.load('en_core_web_sm')
+
+
+def assess_resume(resume_text):
+    nlp = spacy.load('en_core_web_sm')
+    resume_analysis = nlp(resume_text)
+    # print(resume_analysis)
+    words = [token.text for token in resume_analysis]
+    percent = calculate_single_percentage(words, resume_first_val)
+    
+    # print(percent)
+    if percent >= 25:
+        return ("Good resume", percent)
+    else : return ("Bad resume", percent)
+
+
+for i in range(150):
+    second_element_first_row = df.iloc[i, 1]
+    # print(assess_resume(second_element_first_row))
+    #break
+# import csv
+# import pandas as pd
+
+# import spacy
+
+# resume_keys = [
+#     "Objective",
+#     "Summary",
+#     "Computer",
+#     "Data",
+#     "Profile",
+#     "Professional Summary",
+#     "Career Summary",
+#     "Qualifications",
+#     "Skills",
+#     "python",
+#     "january",
+#     "August",
+#     "industry",
+#     "technical",
+#     "exprience"
+#     "Areas of Expertise",
+#     "Key Skills",
+#     "Technical Skills",
+#     "Education",
+#     "Academic Background",
+#     "Professional Experience",
+#     "Work Experience",
+#     "javascript",
+#     "Employment History",
+#     "Relevant Experience",
+#     "Projects",
+#     "Certifications",
+#     "Awards and Honors",
+#     "Achievements",
+#     "Publications",
+#     "Languages",
+#     "Interests",
+#     "Volunteer Work",
+#     "References",
+# ]
+
+# resume_keywords = [value.lower() for value in resume_keys]
+# # data_temp = []
+# # with open('/Users/vikrampidaparthi/Documents/CS222_Project/group-project-team69/UpdatedResumeDataSet 3.csv', 'r', newline='') as csvfile:
+# #     reader = csv.DictReader(csvfile)
+# #     for row in reader:
+# #         #data_temp = [row[1] for row in reader]
+# #         # print(row)
+# #         break
+# # # print(data_temp)
+# # dataset = []
+# # dataset.append(row[1] in data_temp[1])
+# #dataset = [row[1] for row in data_temp[1:]]
+
+
+
+# df = pd.read_csv('/Users/vikrampidaparthi/Documents/CS222_Project/group-project-team69/UpdatedResumeDataSet 3.csv')
+# dataset = df['Resume']
+# ## print(dataset.iloc[0])
+
+
+# dataset = dataset.str.lower()
+
+
+
+
+
+
+# def calculate_keyword_percentage(df, resume_keywords):
+    
+#     percentage_array = []
+#     for index, row in df.iterrows():
+#         total_sum = len(resume_keywords)
+#         total_amt = 0
+#         words = row['Resume'].split()
+        
+#         for word in words:
+#             if word in resume_keywords:
+#                 total_amt+=1
+#         # print(total_amt)
+#         # print(total_sum)
+#         percentage_array.append((float)(total_amt / total_sum) * 100)
+#         # print(percentage_array[0])
+#         #break
+    
+#     return percentage_array
     
 
-percentage_array = calculate_keyword_percentage(df, resume_keywords)
+# percentage_array = calculate_keyword_percentage(df, resume_keywords)
 
-index = 0
-good_resumes = []
-bad_resumes = []
-for percent in percentage_array:
-    # get data only from the column required
-    #required = resume['Resume']
-    #print(percent)
-    if percent >= 30:
-        good_resumes.append(dataset[index])
-    else: bad_resumes.append(dataset[index])
-    index +=1
+# index = 0
+# good_resumes = []
+# bad_resumes = []
+# for percent in percentage_array:
+#     # get data only from the column required
+#     #required = resume['Resume']
+#     ## print(percent)
+#     if percent >= 30:
+#         good_resumes.append(dataset[index])
+#     else: bad_resumes.append(dataset[index])
+#     index +=1
 
-print("Length good:", len(good_resumes))
-print("Length bad:",len(bad_resumes))
+# # print("Length good:", len(good_resumes))
+# # print("Length bad:",len(bad_resumes))
 
-#check the database and do NLP:
+# #check the database and do NLP:
 
-# Load spaCy's English language model
-nlp = spacy.load("en_core_web_sm")
+# # Load spaCy's English language model
+# nlp = spacy.load("en_core_web_sm")
 
-# Define your set of keywords and their importance scores
-keywords = {
-    "Objective" : 0.1,
-    "Summary": 0.2,
-    "Computer": 0.1,
-    "Data": 0.6,
-    "Profile": 0.1,
-    "Professional Summary": 0.1,
-    "Career Summary": 0.1,
-    "Qualifications": 1.5,
-    "Skills": 3,
-    "python": 2,
-    "january": 0.1,
-    "August": 0.1,
-    "industry": 0.1,
-    "technical": 0.1,
-    "exprience": 5,
-    "Areas of Expertise": 0.1,
-    "Key Skills": 0.1,
-    "Technical Skills": 0.1,
-    "Education": 6,
-    "Academic Background": 0.1,
-    "Professional Experience": 4,
-    "Work Experience": 4,
-    "javascript": 0.1,
-    "Employment History": 5,
-    "Relevant Experience": 0.1,
-    "Projects": 0.1,
-    "Certifications": 0.1,
-    "Awards and Honors": 3,
-    "Achievements": 2,
-    "Publications": 3,
-    "Languages": 1,
-    "Interests": 0.1,
-    "Volunteer Work": 0.1,
-    "References": 0.1,
-}
+# # Define your set of keywords and their importance scores
+# keywords = {
+#     "Objective" : 0.1,
+#     "Summary": 0.2,
+#     "Computer": 0.1,
+#     "Data": 0.6,
+#     "Profile": 0.1,
+#     "Professional Summary": 0.1,
+#     "Career Summary": 0.1,
+#     "Qualifications": 1.5,
+#     "Skills": 3,
+#     "python": 2,
+#     "january": 0.1,
+#     "August": 0.1,
+#     "industry": 0.1,
+#     "technical": 0.1,
+#     "exprience": 5,
+#     "Areas of Expertise": 0.1,
+#     "Key Skills": 0.1,
+#     "Technical Skills": 0.1,
+#     "Education": 6,
+#     "Academic Background": 0.1,
+#     "Professional Experience": 4,
+#     "Work Experience": 4,
+#     "javascript": 0.1,
+#     "Employment History": 5,
+#     "Relevant Experience": 0.1,
+#     "Projects": 0.1,
+#     "Certifications": 0.1,
+#     "Awards and Honors": 3,
+#     "Achievements": 2,
+#     "Publications": 3,
+#     "Languages": 1,
+#     "Interests": 0.1,
+#     "Volunteer Work": 0.1,
+#     "References": 0.1,
+# }
 
-good_nlp = []
-bad_nlp = []
-# chat gpt did this method only
-def evaluate_resume(resume_text, database_evaluation):
-    # Tokenize and preprocess the resume
-    doc = nlp(resume_text.lower())
+# good_nlp = []
+# bad_nlp = []
+# # chat gpt did this method only
+# def evaluate_resume(resume_text, database_evaluation):
+#     # Tokenize and preprocess the resume
+#     doc = nlp(resume_text.lower())
 
-    # Calculate the score based on keyword presence and importance
-    score = sum(keywords[key] for key in keywords if key in resume_text.lower())
+#     # Calculate the score based on keyword presence and importance
+#     score = sum(keywords[key] for key in keywords if key in resume_text.lower())
 
-    # Compare the score with the database evaluation
-    if score > 3.0:  # Adjust the threshold as needed
-        return "good"
-    else:
-        return "bad"
+#     # Compare the score with the database evaluation
+#     if score > 3.0:  # Adjust the threshold as needed
+#         return "good"
+#     else:
+#         return "bad"
 
-# Example usage:
-resume_text = "This is an example resume with good experience and skills."
-database_evaluation = "good"  # Replace with your actual database evaluation
+# # Example usage:
+# resume_text = "This is an example resume with good experience and skills."
+# database_evaluation = "good"  # Replace with your actual database evaluation
 
-for resume in dataset:
-    result = evaluate_resume(resume_text, database_evaluation)
-    if(result == "good") : good_nlp.append(resume)
-    else : bad_nlp.append(resume)
-    print(f"Resume is {result}")
+# for resume in dataset:
+#     result = evaluate_resume(resume_text, database_evaluation)
+#     if(result == "good") : good_nlp.append(resume)
+#     else : bad_nlp.append(resume)
+#     # print(f"Resume is {result}")
 
 
 
