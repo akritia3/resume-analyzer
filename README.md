@@ -19,7 +19,7 @@ More can be found here: https://docs.google.com/document/d/13XSAUw4IflXhnf2wsx3L
 
 ## Group members and their role
 
-- **Vikram Pidaparthi:** Contributor to the backend, specifically creating the Spacy natural-language-processing model to train and test the dataset and use the data check to see if the uploaded resume is good or not, along with creating the score. 
+- **Vikramaditya Pidaparthi:** Contributor to the backend, specifically creating the Spacy natural-language-processing model to train and test the dataset and use the data check to see if the uploaded resume is good or not, along with creating the score. 
 
 - **Keisha Kaba:** Responsible for creating and developing functionality of the PDF parser, as well as writing the Naive Bayes model
 
